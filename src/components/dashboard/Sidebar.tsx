@@ -3,136 +3,150 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    Sparkles,
-    Wand2,
-    History,
+    PenLine,
+    Archive,
     Settings,
-    CreditCard,
-    ChevronLeft,
-    ChevronRight,
-    LayoutDashboard,
-    Zap
+    Zap,
+    HelpCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PLAN_LIMITS, BRANDING } from "@/config";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SidebarProps {
     userInfo: {
         email: string;
         fullName: string;
         plan: "free" | "basic" | "pro";
+        quotaUsed?: number;
+        quotaLimit?: number;
     };
 }
 
 const navItems = [
-    { label: "Architect", icon: Wand2, href: "/dashboard" },
-    { label: "Archive", icon: History, href: "/dashboard/history" },
-    { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+    { 
+        label: "Create", 
+        icon: PenLine, 
+        href: "/dashboard"
+    },
+    { 
+        label: "Archive", 
+        icon: Archive, 
+        href: "/dashboard/history"
+    },
 ];
 
-export function Sidebar({ userInfo }: SidebarProps) {
+const bottomNavItems = [
+    { 
+        label: "Settings", 
+        icon: Settings, 
+        href: "/dashboard/settings"
+    },
+    { 
+        label: "Help", 
+        icon: HelpCircle, 
+        href: "#",
+        external: true
+    },
+];
+
+export function Sidebar({ }: SidebarProps) {
     const pathname = usePathname();
-    const [collapsed, setCollapsed] = useState(false);
-    const dailyLimit = userInfo.plan === 'pro' ? -1 : PLAN_LIMITS[userInfo.plan];
+
+    const isActive = (href: string) => {
+        if (href === "/dashboard") {
+            return pathname === "/dashboard";
+        }
+        return pathname.startsWith(href);
+    };
 
     return (
-        <aside
-            className={cn(
-                "h-screen border-r border-border/50 bg-background flex flex-col transition-all duration-300 sticky top-0 z-50",
-                collapsed ? "w-20" : "w-64"
-            )}
-        >
-            {/* Logo Section */}
-            <div className="h-16 flex items-center shrink-0 px-6 border-b border-border/30">
-                <Link href="/" className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center shadow-lg shadow-primary/20">
-                        <Zap className="w-4 h-4 text-primary-foreground fill-current" />
+        <TooltipProvider delayDuration={0}>
+            <aside className="h-full w-20 bg-background/80 backdrop-blur-xl border-r border-border flex flex-col items-center py-4">
+                {/* Logo */}
+                <Link href="/" className="mb-6">
+                    <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-sm">
+                        <Zap className="w-5 h-5 text-primary-foreground" />
                     </div>
-                    {!collapsed && (
-                        <span className="text-lg font-black tracking-tighter text-foreground">
-                            {BRANDING.logo.text.slice(0, -BRANDING.logo.highlight.length)}
-                            <span className="text-primary">{BRANDING.logo.highlight}</span>
-                        </span>
-                    )}
                 </Link>
-            </div>
 
-            {/* Navigation */}
-            <div className="flex-1 py-8 px-4 space-y-8 overflow-y-auto">
-                <div className="space-y-1.5">
-                    {!collapsed && (
-                        <div className="px-4 mb-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
-                            Menu
-                        </div>
-                    )}
+                {/* Main Navigation */}
+                <nav className="flex-1 flex flex-col items-center gap-1 w-full px-2">
                     {navItems.map((item) => {
-                        const isActive = pathname === item.href;
+                        const active = isActive(item.href);
                         return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
-                                    isActive
-                                        ? "bg-primary/10 text-primary"
-                                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                                )}
-                            >
-                                <item.icon className={cn(
-                                    "w-5 h-5 shrink-0 transition-transform group-hover:scale-110",
-                                    isActive ? "text-primary" : "text-muted-foreground/60"
-                                )} />
-                                {!collapsed && <span className="text-sm font-bold tracking-tight">{item.label}</span>}
-                                {isActive && (
-                                    <div className="absolute left-0 w-1 h-5 bg-primary rounded-r-full" />
-                                )}
-                            </Link>
+                            <Tooltip key={item.href + item.label}>
+                                <TooltipTrigger asChild>
+                                    <Link
+                                        href={item.href}
+                                        className={cn(
+                                            "w-full flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all group",
+                                            active
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        )}
+                                    >
+                                        <item.icon className={cn(
+                                            "w-5 h-5 mb-1",
+                                            active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                        )} />
+                                        <span className={cn(
+                                            "text-[10px] font-medium leading-tight",
+                                            active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                        )}>
+                                            {item.label}
+                                        </span>
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="font-medium">
+                                    {item.label}
+                                </TooltipContent>
+                            </Tooltip>
                         );
                     })}
+                </nav>
+
+                {/* Bottom Navigation */}
+                <div className="flex flex-col items-center gap-1 w-full px-2 mt-auto">
+                    {bottomNavItems.map((item) => {
+                        const active = isActive(item.href);
+                        return (
+                            <Tooltip key={item.href + item.label}>
+                                <TooltipTrigger asChild>
+                                    <Link
+                                        href={item.href}
+                                        className={cn(
+                                            "w-full flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all group",
+                                            active
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        )}
+                                    >
+                                        <item.icon className={cn(
+                                            "w-5 h-5 mb-1",
+                                            active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                        )} />
+                                        <span className={cn(
+                                            "text-[10px] font-medium leading-tight",
+                                            active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                        )}>
+                                            {item.label}
+                                        </span>
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="font-medium">
+                                    {item.label}
+                                </TooltipContent>
+                            </Tooltip>
+                        );
+                    })}
+
                 </div>
-
-                {/* Plan Status */}
-                {!collapsed && (
-                    <div className="px-2">
-                        <div className="p-5 rounded-2xl bg-muted/30 border border-border/40 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:rotate-12 transition-transform">
-                                <Sparkles className="w-12 h-12 text-primary" />
-                            </div>
-                            <div className="relative space-y-4">
-                                <div>
-                                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Status</div>
-                                    <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-wider border border-primary/20">
-                                        {userInfo.plan}
-                                    </div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Usage Quota</div>
-                                    <div className="text-xs font-bold text-foreground">
-                                        {dailyLimit === -1 ? "Unlimited Protocol" : `${dailyLimit} ops / mo`}
-                                    </div>
-                                </div>
-                                {userInfo.plan === "free" && (
-                                    <Button size="sm" className="w-full h-9 rounded-xl font-bold text-[10px] tracking-widest uppercase bg-foreground text-background hover:bg-foreground/90 transition-all" asChild>
-                                        <Link href="/dashboard/settings">Upgrade</Link>
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Collapse Toggle */}
-            <div className="p-4 border-t border-border/30">
-                <button
-                    onClick={() => setCollapsed(!collapsed)}
-                    className="w-full flex items-center justify-center h-10 rounded-xl hover:bg-muted text-muted-foreground transition-colors"
-                >
-                    {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-                </button>
-            </div>
-        </aside>
+            </aside>
+        </TooltipProvider>
     );
 }

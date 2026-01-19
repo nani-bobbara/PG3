@@ -21,7 +21,7 @@ export interface SupportedTemplate {
     name: string;
     description: string;
     structure: string;
-    default_params: Record<string, any>;
+    default_params: Record<string, unknown>;
     param_schema: ParameterSchema[];
     help_text?: string;
     is_active: boolean;

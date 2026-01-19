@@ -5,7 +5,7 @@ export interface Template {
     category: 'Image' | 'Video' | 'Text' | 'Utility';
     structure: string;
     help_text?: string;
-    default_params?: Record<string, any>;
+    default_params?: Record<string, unknown>;
 }
 
 export const templates: Template[] = [

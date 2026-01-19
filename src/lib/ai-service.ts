@@ -38,8 +38,9 @@ export class AIProviderService {
             const data = await response.json();
             const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
             return { content };
-        } catch (err: any) {
-            return { content: "", error: err.message || "Failed to contact Gemini" };
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to contact Gemini";
+            return { content: "", error: message };
         }
     }
 
@@ -70,8 +71,9 @@ export class AIProviderService {
             const data = await response.json();
             const content = data.choices?.[0]?.message?.content || "";
             return { content };
-        } catch (err: any) {
-            return { content: "", error: err.message || "Failed to contact OpenAI" };
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to contact OpenAI";
+            return { content: "", error: message };
         }
     }
 

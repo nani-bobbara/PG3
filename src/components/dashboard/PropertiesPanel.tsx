@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Loader2, Wand2, Info, HelpCircle, Sliders, ChevronRight } from "lucide-react";
+import { Loader2, Info, HelpCircle, Sliders, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import {
     Dialog,
@@ -29,8 +29,8 @@ import { cn } from "@/lib/utils";
 interface PropertiesPanelProps {
     template: SupportedTemplate | null;
     style: Style;
-    parameters: Record<string, any>;
-    onParamChange: (key: string, value: any) => void;
+    parameters: Record<string, unknown>;
+    onParamChange: (key: string, value: unknown) => void;
     onGenerate: () => void;
     isPending: boolean;
 }
@@ -85,7 +85,7 @@ export function PropertiesPanel({
                     <div key={schema.key} className="space-y-4">
                         <div className="flex items-center justify-between">
                             {labelEl}
-                            <span className="text-[10px] font-mono text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full">{parameters[schema.key]}</span>
+                            <span className="text-[10px] font-mono text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full">{String(parameters[schema.key] ?? '')}</span>
                         </div>
                         <div className="px-1">
                             <Slider
@@ -107,7 +107,7 @@ export function PropertiesPanel({
                         {labelEl}
                         <Input
                             placeholder={schema.placeholder}
-                            value={parameters[schema.key] || ''}
+                            value={String(parameters[schema.key] ?? '')}
                             onChange={(e) => onParamChange(schema.key, e.target.value)}
                             className="h-11 bg-muted/40 border-border/40 hover:border-primary/50 transition-all rounded-xl shadow-sm font-medium"
                         />
@@ -150,13 +150,13 @@ export function PropertiesPanel({
                                 <div className="prose prose-sm dark:prose-invert max-w-none prose-p:font-medium prose-p:leading-relaxed">
                                     <ReactMarkdown
                                         components={{
-                                            h1: ({ node, ...props }) => <h1 className="text-xl font-bold mb-4 text-primary" {...props} />,
-                                            h2: ({ node, ...props }) => <h2 className="text-sm font-bold mt-8 mb-4 text-foreground uppercase tracking-widest border-l-2 border-primary pl-4" {...props} />,
-                                            h3: ({ node, ...props }) => <h3 className="text-base font-bold mt-4 mb-2 text-foreground" {...props} />,
-                                            p: ({ node, ...props }) => <p className="text-muted-foreground/80 leading-relaxed mb-6" {...props} />,
-                                            ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-6 space-y-3" {...props} />,
-                                            li: ({ node, ...props }) => <li className="text-muted-foreground/80 font-medium" {...props} />,
-                                            code: ({ node, ...props }) => <code className="bg-primary/10 px-1.5 py-0.5 rounded text-primary font-mono text-xs font-bold" {...props} />,
+                                            h1: (props) => <h1 className="text-xl font-bold mb-4 text-primary" {...props} />,
+                                            h2: (props) => <h2 className="text-sm font-bold mt-8 mb-4 text-foreground uppercase tracking-widest border-l-2 border-primary pl-4" {...props} />,
+                                            h3: (props) => <h3 className="text-base font-bold mt-4 mb-2 text-foreground" {...props} />,
+                                            p: (props) => <p className="text-muted-foreground/80 leading-relaxed mb-6" {...props} />,
+                                            ul: (props) => <ul className="list-disc pl-5 mb-6 space-y-3" {...props} />,
+                                            li: (props) => <li className="text-muted-foreground/80 font-medium" {...props} />,
+                                            code: (props) => <code className="bg-primary/10 px-1.5 py-0.5 rounded text-primary font-mono text-xs font-bold" {...props} />,
                                         }}
                                     >
                                         {template.help_text}

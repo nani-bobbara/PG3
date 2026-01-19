@@ -10,7 +10,7 @@ interface GeneratePromptInput {
     templateStructure?: string;
     style?: string;
     modelId: string;
-    parameters?: Record<string, any>;
+    parameters?: Record<string, unknown>;
 }
 
 interface GeneratePromptResult {
@@ -124,7 +124,7 @@ export async function generatePrompt(input: GeneratePromptInput): Promise<Genera
     return result;
 }
 
-function buildDynamicPrompt(template: string, topic: string, style?: string, params?: Record<string, any>): string {
+function buildDynamicPrompt(template: string, topic: string, style?: string, params?: Record<string, unknown>): string {
     let prompt = template || "";
 
     if (params) {

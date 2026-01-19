@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { SupportedTemplate } from "@/types/dynamic-config";
+import { LucideIcon } from "lucide-react";
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
     'Image': ImageIcon,
     'Video': VideoIcon,
     'Text': FileText,

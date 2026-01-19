@@ -1,54 +1,53 @@
-import { Wand2, Layers, Zap, Shield, Sparkles, Bot, Cpu } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Layers, Zap, Palette, Sparkles, Wand2, History, Key, Image } from "lucide-react";
 
 const features = [
     {
-        icon: Bot,
-        title: "Adaptive Intelligence",
-        description: "Dynamic selection between multiple LLM engines to optimize for specific creative constraints.",
+        icon: Wand2,
+        title: "One-Click Magic",
+        description: "Describe your idea in plain English — we'll craft the perfect prompt for stunning AI-generated images.",
     },
     {
         icon: Layers,
-        title: "Protocol Blueprints",
-        description: "Engine-specific structures for Midjourney, DALL·E, Sora, and professional copy.",
+        title: "Ready-Made Templates",
+        description: "Choose from curated templates for Midjourney, DALL·E, marketing copy, and more. Just fill in the blanks.",
     },
     {
-        icon: Sparkles,
-        title: "Aesthetic Signatures",
-        description: "Layered visual styles including Cinematic, Cyberpunk, and 8K photorealism triggers.",
+        icon: Palette,
+        title: "Style Presets",
+        description: "Apply beautiful art styles like Cinematic, Cyberpunk, or Watercolor with a single click.",
     },
     {
-        icon: Cpu,
-        title: "Neural Refinement",
-        description: "Post-processing logic that scans for clarity, impact, and platform adherence.",
+        icon: Image,
+        title: "Works Everywhere",
+        description: "Copy your polished prompts directly into Midjourney, DALL·E, Stable Diffusion, or any AI art tool.",
     },
     {
-        icon: Zap,
-        title: "Sub-Second Latency",
-        description: "Optimized streaming response times for instant creative iteration.",
+        icon: History,
+        title: "Never Lose a Prompt",
+        description: "Your entire prompt history is saved automatically. Find and reuse your best creations anytime.",
     },
     {
-        icon: Shield,
-        title: "Encryption Layer",
-        description: "Bring your own identity via API keys with military-grade local storage.",
+        icon: Key,
+        title: "Use Your Own Keys",
+        description: "Bring your own API keys for unlimited generations. Your keys stay encrypted and private.",
     },
 ];
 
 export function FeaturesSection() {
     return (
-        <section id="features" className="py-32 relative bg-muted/10">
+        <section id="how-it-works" className="py-24 md:py-32 relative bg-muted/30 dark:bg-muted/10">
             <div className="container mx-auto px-6">
                 {/* Section Header */}
-                <div className="text-center mb-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-6">
-                        <Cpu className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Core Capabilities</span>
+                <div className="text-center mb-16 md:mb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-semibold text-foreground">Why Creators Love Us</span>
                     </div>
-                    <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 leading-none">
-                        Engineered for <br /><span className="text-primary italic">Total Mastery</span>
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+                        Everything You Need to <span className="text-primary">Create</span>
                     </h2>
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed">
-                        A comprehensive ecosystem designed to bridge the gap between human imagination and machine precision.
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Stop struggling with prompt syntax. Focus on your creative vision — we handle the technical details.
                     </p>
                 </div>
 
@@ -57,16 +56,13 @@ export function FeaturesSection() {
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="group relative p-10 rounded-[2rem] bg-card border border-border/40 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5"
+                            className="group relative p-8 rounded-2xl bg-card dark:bg-card/60 border border-border/50 dark:border-border/30 hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 dark:hover:shadow-primary/10"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
-                                <feature.icon className="w-6 h-6" />
+                            <div className="w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center mb-5 group-hover:bg-primary transition-all duration-300">
+                                <feature.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-4 tracking-tight uppercase tracking-[0.05em]">{feature.title}</h3>
-                            <p className="text-sm font-bold text-muted-foreground leading-relaxed">{feature.description}</p>
-
-                            {/* Decorative element */}
-                            <div className="absolute top-6 right-6 w-12 h-12 bg-primary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                         </div>
                     ))}
                 </div>

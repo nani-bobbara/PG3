@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Trash2, Copy, Check, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { format } from "date-fns";
 
 export default async function HistoryPage() {

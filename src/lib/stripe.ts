@@ -8,6 +8,6 @@ export const stripe = new Stripe(apiKey, {
     typescript: true,
 });
 
-export const getStripeSession = async (priceId: string, customerId?: string) => {
+export const getStripeSession = async (_priceId: string, _customerId?: string) => {
     // Implementation for creating checkout sessions
 };

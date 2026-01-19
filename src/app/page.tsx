@@ -23,20 +23,20 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-border/30 bg-muted/20">
+      <footer className="py-12 border-t border-border/30 bg-muted/20 dark:bg-muted/10">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary via-primary/80 to-accent flex items-center justify-center shadow-lg shadow-primary/20">
-                <Zap className="w-4 h-4 text-primary-foreground fill-current" />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <Zap className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="text-xl font-black tracking-tighter text-foreground">
+              <span className="text-lg font-bold text-foreground">
                 {BRANDING.logo.text.slice(0, -BRANDING.logo.highlight.length)}
                 <span className="text-primary">{BRANDING.logo.highlight}</span>
               </span>
             </Link>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              © {new Date().getFullYear()} {BRANDING.company}. PROMPT ENGINEERING PROTOCOL v1.0
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} {BRANDING.company}. All rights reserved.
             </p>
           </div>
         </div>

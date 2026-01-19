@@ -1,22 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Menu, LogOut, Settings, User, Sparkles, Bell } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { 
+    Menu, 
+    Settings, 
+    LogOut, 
+    Bell, 
+    ChevronRight,
+    Sparkles,
+    Sun,
+    Moon,
+    Monitor,
+    Home
+} from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sidebar } from "./Sidebar";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
+    DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
-import { Sidebar } from "./Sidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -24,94 +37,201 @@ interface HeaderProps {
         email: string;
         fullName: string;
         plan: "free" | "basic" | "pro";
+        quotaUsed?: number;
+        quotaLimit?: number;
     };
 }
 
+// Breadcrumb config
+const breadcrumbLabels: Record<string, string> = {
+    "/dashboard": "Create",
+    "/dashboard/history": "Archive",
+    "/dashboard/settings": "Settings",
+};
+
 export function Header({ userInfo }: HeaderProps) {
     const router = useRouter();
+    const pathname = usePathname();
     const supabase = createClient();
-    const initials = userInfo.fullName.charAt(0).toUpperCase();
+    const { setTheme, theme } = useTheme();
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         router.push("/");
         router.refresh();
-        toast.success("Safe departure confirmed");
+    };
+
+    const initials = userInfo.fullName
+        .split(" ")
+        .map(n => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || userInfo.email.charAt(0).toUpperCase();
+
+    const quotaUsed = userInfo.quotaUsed || 0;
+    const quotaLimit = userInfo.quotaLimit || 50;
+    const remaining = quotaLimit - quotaUsed;
+    const usagePercent = Math.min((quotaUsed / quotaLimit) * 100, 100);
+
+    // Build breadcrumb
+    const currentPage = breadcrumbLabels[pathname] || "Dashboard";
+
+    // Plan colors
+    const planColors = {
+        free: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+        basic: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+        pro: "bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 dark:from-amber-900/50 dark:to-orange-900/50 dark:text-amber-300",
     };
 
     return (
-        <header className="sticky top-0 z-40 bg-background/40 backdrop-blur-3xl border-b border-border/30 h-16 flex items-center justify-between px-6">
+        <header className="sticky top-0 z-40 bg-background/70 backdrop-blur-xl border-b border-border/40 shadow-sm h-14 flex items-center px-4 md:px-6">
             {/* Mobile Menu Toggle */}
-            <div className="md:hidden">
+            <div className="md:hidden mr-3">
                 <Sheet>
                     <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted">
-                            <Menu className="w-5 h-5 text-foreground" />
+                        <Button variant="ghost" size="icon" className="h-9 w-9">
+                            <Menu className="w-5 h-5" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="p-0 w-64 border-r border-border/40">
+                    <SheetContent side="left" className="p-0 w-20">
                         <Sidebar userInfo={userInfo} />
                     </SheetContent>
                 </Sheet>
             </div>
 
-            {/* Breadcrumb / Context Placeholder */}
-            <div className="hidden md:flex items-center gap-2">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 py-1 rounded-full bg-muted/50 border border-border/30">
-                    System Active
-                </span>
-            </div>
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm">
+                <Link 
+                    href="/dashboard" 
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                >
+                    <Home className="w-4 h-4" />
+                </Link>
+                {currentPage !== "Create" && (
+                    <>
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
+                        <span className="font-medium text-foreground">{currentPage}</span>
+                    </>
+                )}
+            </nav>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-4 ml-auto">
-                <ThemeToggle />
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hidden sm:flex">
-                    <Bell className="w-4 h-4" />
-                </Button>
+            <div className="flex items-center gap-2 ml-auto">
+                {/* Usage/Plan Badge */}
+                <div className="hidden sm:flex items-center">
+                    <div className={cn(
+                        "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium",
+                        planColors[userInfo.plan]
+                    )}>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span className="capitalize">{userInfo.plan}</span>
+                        <span className="opacity-60">•</span>
+                        <span>{quotaUsed}/{quotaLimit}</span>
+                    </div>
+                </div>
 
-                <div className="h-6 w-[1px] bg-border/40 hidden sm:block mx-1" />
+                {/* Notifications */}
+                <Button variant="ghost" size="icon" className="h-9 w-9 relative">
+                    <Bell className="w-4 h-4" />
+                    {/* Notification dot */}
+                    <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                </Button>
 
                 {/* Profile Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <button className="flex items-center gap-3 p-1 rounded-2xl hover:bg-muted/50 transition-all active:scale-95 group">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 via-primary to-accent flex items-center justify-center text-xs font-black text-primary-foreground shadow-lg shadow-primary/10 group-hover:shadow-primary/30 transition-all">
+                        <button className="flex items-center gap-2 p-1 rounded-full hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary via-primary to-primary/60 flex items-center justify-center text-xs font-bold text-primary-foreground ring-2 ring-background">
                                 {initials}
-                            </div>
-                            <div className="text-left hidden sm:block">
-                                <div className="text-xs font-bold text-foreground leading-none mb-1">{userInfo.fullName}</div>
-                                <div className="text-[10px] font-bold text-primary/70 uppercase tracking-tighter leading-none">{userInfo.plan} tier</div>
                             </div>
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64 p-2 rounded-2xl border-border/40 shadow-2xl mt-2" align="end">
-                        <DropdownMenuLabel className="p-3">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-bold text-foreground">{userInfo.fullName}</p>
-                                <p className="text-[10px] font-medium text-muted-foreground truncate">{userInfo.email}</p>
+                    <DropdownMenuContent className="w-64 p-2" align="end" sideOffset={8}>
+                        {/* User Info Header */}
+                        <div className="px-2 py-3 mb-1">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-sm font-bold text-primary-foreground">
+                                    {initials}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-foreground truncate">{userInfo.fullName}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{userInfo.email}</p>
+                                </div>
                             </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-border/30" />
-                        <DropdownMenuItem asChild className="rounded-xl py-3 focus:bg-primary/10 focus:text-primary">
-                            <Link href="/dashboard/settings" className="flex items-center cursor-pointer w-full">
-                                <Settings className="mr-3 h-4 w-4" />
-                                <span className="font-semibold text-sm">Settings</span>
+                            {/* Mobile usage display */}
+                            <div className="sm:hidden mt-3 flex items-center gap-2 text-xs">
+                                <span className={cn(
+                                    "px-2 py-0.5 rounded-full font-medium capitalize",
+                                    planColors[userInfo.plan]
+                                )}>
+                                    {userInfo.plan}
+                                </span>
+                                <span className="text-muted-foreground">{remaining} credits left</span>
+                            </div>
+                        </div>
+                        
+                        <DropdownMenuSeparator className="my-1" />
+                        
+                        {/* Theme Submenu */}
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="rounded-lg">
+                                <div className="flex items-center gap-2">
+                                    {theme === "dark" ? (
+                                        <Moon className="w-4 h-4" />
+                                    ) : theme === "light" ? (
+                                        <Sun className="w-4 h-4" />
+                                    ) : (
+                                        <Monitor className="w-4 h-4" />
+                                    )}
+                                    <span>Theme</span>
+                                </div>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                                <DropdownMenuSubContent className="min-w-[140px]">
+                                    <DropdownMenuItem 
+                                        onClick={() => setTheme("light")}
+                                        className={cn("rounded-lg", theme === "light" && "bg-muted")}
+                                    >
+                                        <Sun className="mr-2 h-4 w-4" />
+                                        Light
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => setTheme("dark")}
+                                        className={cn("rounded-lg", theme === "dark" && "bg-muted")}
+                                    >
+                                        <Moon className="mr-2 h-4 w-4" />
+                                        Dark
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => setTheme("system")}
+                                        className={cn("rounded-lg", theme === "system" && "bg-muted")}
+                                    >
+                                        <Monitor className="mr-2 h-4 w-4" />
+                                        System
+                                    </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                        </DropdownMenuSub>
+
+                        <DropdownMenuItem asChild className="rounded-lg">
+                            <Link href="/dashboard/settings" className="cursor-pointer">
+                                <Settings className="mr-2 h-4 w-4" />
+                                Settings
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="rounded-xl py-3 focus:bg-primary/10 focus:text-primary">
-                            <Link href="/dashboard/settings" className="flex items-center cursor-pointer w-full">
-                                <User className="mr-3 h-4 w-4" />
-                                <span className="font-semibold text-sm">Account</span>
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-border/30" />
-                        <DropdownMenuItem onClick={handleSignOut} className="rounded-xl py-3 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
-                            <LogOut className="mr-3 h-4 w-4" />
-                            <span className="font-semibold text-sm">Sign out</span>
+                        
+                        <DropdownMenuSeparator className="my-1" />
+                        
+                        <DropdownMenuItem 
+                            onClick={handleSignOut} 
+                            className="rounded-lg text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
+                        >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Sign Out
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-        </header >
+        </header>
     );
 }

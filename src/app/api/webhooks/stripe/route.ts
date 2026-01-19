@@ -16,17 +16,19 @@ export async function POST(req: Request) {
             signature,
             process.env.STRIPE_WEBHOOK_SECRET!
         );
-    } catch (error: any) {
-        return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
     }
 
     const session = event.data.object as Stripe.Checkout.Session;
     const supabase = await createClient();
 
     if (event.type === 'checkout.session.completed') {
-        // Cast to any to avoid strict type issues with the SDK version
-        const subscription: any = await stripe.subscriptions.retrieve(session.subscription as string);
-        const priceId = subscription.items.data[0].price.id;
+        const subscriptionResponse = await stripe.subscriptions.retrieve(session.subscription as string);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const subscriptionData = subscriptionResponse as any;
+        const priceId = subscriptionData.items.data[0].price.id;
 
         // Find tier by price_id
         const { data: tier } = await supabase
@@ -36,14 +38,17 @@ export async function POST(req: Request) {
             .single();
 
         if (tier) {
+            const periodEnd = subscriptionData.current_period_end 
+                ? new Date(subscriptionData.current_period_end * 1000).toISOString()
+                : null;
             await supabase
                 .from('subscriptions')
                 .update({
-                    stripe_subscription_id: subscription.id,
-                    stripe_customer_id: subscription.customer as string,
+                    stripe_subscription_id: subscriptionData.id,
+                    stripe_customer_id: subscriptionData.customer as string,
                     current_tier: tier.id,
                     status: 'active',
-                    quota_reset_at: new Date(subscription.current_period_end * 1000).toISOString()
+                    quota_reset_at: periodEnd
                 })
                 .eq('user_id', session.client_reference_id);
         }

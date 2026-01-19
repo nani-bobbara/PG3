@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
+import { PLAN_LIMITS } from "@/config/plans";
 
 export default async function DashboardLayout({
     children,
@@ -22,30 +23,39 @@ export default async function DashboardLayout({
         .eq("user_id", user.id)
         .single();
 
-    // Fetch subscription
+    // Fetch subscription with quota info
     const { data: subscription } = await supabase
         .from("subscriptions")
-        .select("plan, status")
+        .select("plan, status, quota_used")
         .eq("user_id", user.id)
         .single();
+
+    const plan = (subscription?.plan as "free" | "basic" | "pro") || "free";
+    const quotaUsed = subscription?.quota_used || 0;
+    const quotaLimit = PLAN_LIMITS[plan] || 50;
 
     const userInfo = {
         email: user.email || "",
         fullName: profile?.full_name || user.email?.split("@")[0] || "User",
-        plan: (subscription?.plan as "free" | "basic" | "pro") || "free",
+        plan,
+        quotaUsed,
+        quotaLimit,
     };
 
     return (
-        <div className="min-h-screen bg-background flex">
-            {/* Desktop Sidebar */}
-            <div className="hidden md:block">
+        <div className="h-screen bg-background flex overflow-hidden">
+            {/* Desktop Sidebar - Fixed */}
+            <aside className="hidden md:block fixed left-0 top-0 bottom-0 z-50">
                 <Sidebar userInfo={userInfo} />
-            </div>
+            </aside>
 
-            {/* Main Area */}
-            <div className="flex-1 flex flex-col">
+            {/* Main Area - Offset by sidebar width */}
+            <div className="flex-1 flex flex-col md:ml-20 min-h-screen">
+                {/* Header - Fixed */}
                 <Header userInfo={userInfo} />
-                <main className="flex-1 overflow-hidden h-full relative">
+                
+                {/* Scrollable Content */}
+                <main className="flex-1 overflow-auto">
                     {children}
                 </main>
             </div>
