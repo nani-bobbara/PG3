@@ -32,7 +32,7 @@ export default async function DashboardLayout({
     const userInfo = {
         email: user.email || "",
         fullName: profile?.full_name || user.email?.split("@")[0] || "User",
-        plan: (subscription?.plan as "free" | "creator" | "pro") || "free",
+        plan: (subscription?.plan as "free" | "basic" | "pro") || "free",
     };
 
     return (

@@ -21,7 +21,7 @@ interface HeaderProps {
     userInfo: {
         email: string;
         fullName: string;
-        plan: "free" | "creator" | "pro";
+        plan: "free" | "basic" | "pro";
     };
 }
 

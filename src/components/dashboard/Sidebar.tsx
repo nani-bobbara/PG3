@@ -20,7 +20,7 @@ interface SidebarProps {
     userInfo: {
         email: string;
         fullName: string;
-        plan: "free" | "creator" | "pro";
+        plan: "free" | "basic" | "pro";
     };
 }
 
@@ -33,7 +33,7 @@ const navItems = [
 export function Sidebar({ userInfo }: SidebarProps) {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
-    const dailyLimit = PLAN_LIMITS[userInfo.plan];
+    const dailyLimit = userInfo.plan === 'pro' ? -1 : PLAN_LIMITS[userInfo.plan];
 
     return (
         <aside
