@@ -274,7 +274,7 @@ export function PromptGenerator({ initialTemplates, initialModels, subscription 
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <Label className="text-sm font-semibold text-foreground">AI Model</Label>
-                            {subscription?.tier.features.byok_enabled && (
+                            {subscription?.tier?.features?.byok_enabled && (
                                 <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-accent/10 border border-accent/20">
                                     <span className="text-[10px] font-bold uppercase text-accent leading-none">BYOK</span>
                                     <Switch
@@ -299,7 +299,7 @@ export function PromptGenerator({ initialTemplates, initialModels, subscription 
                                 ))}
                             </SelectContent>
                         </Select>
-                        {!subscription?.tier.features.byok_enabled && (
+                        {!subscription?.tier?.features?.byok_enabled && (
                             <p className="text-[10px] text-muted-foreground italic">
                                 Upgrade to Premium to use your own API keys.
                             </p>

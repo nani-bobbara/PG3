@@ -3,10 +3,12 @@
 PromptGen is a professional prompt engineering workspace that converts simple concepts into high-fidelity AI instructions for Midjourney, DALL·E 3, and Marketing workflows.
 
 ## 📁 Repository Overview
-This project is a monorepo containing the Next.js application and Supabase database configuration.
+This repository contains the full-stack PromptGen application, integrated with Supabase and Stripe.
 
-- **`/prompt-gen-nextjs`**: Next.js 14 Frontend & Server Logic.
-- **`/supabase`**: Database Schema, Migrations, and Dynamic Config.
+- **`/src`**: Next.js 14 Frontend, Server Actions, and API Routes.
+- **`/supabase`**: Database Schema, Migrations, and Configuration.
+- **`/public`**: Static assets and public resources.
+- **`/docs`**: Comprehensive architecture and deployment guides.
 
 ## 🛠️ Features
 - **Dynamic Parameters**: Every template has its own unique slider and select controls.

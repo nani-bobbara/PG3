@@ -1,5 +1,5 @@
 import { Stripe } from 'stripe';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { stripe } from '@/lib/stripe';
 
 export class StripeService {
@@ -8,7 +8,7 @@ export class StripeService {
      * Provisions the subscription in `user_subscriptions`
      */
     static async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-        const supabase = await createClient();
+        const supabase = createAdminClient();
         const subscriptionId = session.subscription as string;
         const customerId = session.customer as string;
         const userId = session.client_reference_id as string;
@@ -22,11 +22,11 @@ export class StripeService {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = subscription.items.data[0].price.id;
 
-        // Find internal tier by matching stripe_price_id
+        // Find internal tier by matching stripe_monthly_price_id or stripe_yearly_price_id
         const { data: tier } = await supabase
             .from('subscription_tiers')
             .select('id, monthly_quota')
-            .eq('stripe_price_id', priceId)
+            .or(`stripe_monthly_price_id.eq.${priceId},stripe_yearly_price_id.eq.${priceId}`)
             .single();
 
         if (!tier) {
@@ -62,14 +62,14 @@ export class StripeService {
      * Updates status, syncs periods, handles renewals/cancellations
      */
     static async handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-        const supabase = await createClient();
+        const supabase = createAdminClient();
         const priceId = subscription.items.data[0].price.id;
 
         // Get Tier
         const { data: tier } = await supabase
             .from('subscription_tiers')
             .select('id, monthly_quota')
-            .eq('stripe_price_id', priceId)
+            .or(`stripe_monthly_price_id.eq.${priceId},stripe_yearly_price_id.eq.${priceId}`)
             .single();
 
         if (!tier) {
@@ -105,7 +105,7 @@ export class StripeService {
      * Handles 'customer.subscription.deleted'
      */
     static async handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         // Revert to Free Tier
         const { data: freeTier } = await supabase
@@ -133,7 +133,7 @@ export class StripeService {
      * Caches Stripe data into `subscription_tiers` to avoid runtime API calls
      */
     static async handleProductOrPriceUpdate(event: Stripe.Event) {
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         if (event.type.startsWith('product.')) {
             const product = event.data.object as Stripe.Product;
@@ -150,16 +150,28 @@ export class StripeService {
         if (event.type.startsWith('price.')) {
             const price = event.data.object as Stripe.Price;
             const productId = typeof price.product === 'string' ? price.product : price.product.id;
+            const interval = price.recurring?.interval;
+
+            const updateData: Record<string, any> = {
+                currency: price.currency,
+            };
+
+            // Optional: Update quota from metadata if present
+            if (price.metadata?.monthly_quota) {
+                updateData.monthly_quota = parseInt(price.metadata.monthly_quota);
+            }
+
+            if (interval === 'month') {
+                updateData.stripe_monthly_price_id = price.id;
+                updateData.monthly_price_in_cents = price.unit_amount || 0;
+            } else if (interval === 'year') {
+                updateData.stripe_yearly_price_id = price.id;
+                updateData.yearly_price_in_cents = price.unit_amount || 0;
+            }
 
             await supabase
                 .from('subscription_tiers')
-                .update({
-                    price_in_cents: price.unit_amount || 0,
-                    stripe_price_id: price.id,
-                    currency: price.currency,
-                    // Use metadata to define quota if updating from Stripe
-                    monthly_quota: price.metadata?.monthly_quota ? parseInt(price.metadata.monthly_quota) : undefined
-                })
+                .update(updateData)
                 .eq('stripe_product_id', productId);
         }
     }

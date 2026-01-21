@@ -1,0 +1,289 @@
+{
+    "page": {
+        "name": "PG3 Landing Page",
+        "theme": {
+            "mode": "light",
+            "primaryColor": "#4A6CF7",
+            "secondaryColor": "#111827",
+            "accentColor": "#10B981",
+            "backgroundColor": "#FFFFFF",
+            "textColor": "#1F2937",
+            "fontFamily": "Inter, sans-serif",
+            "borderRadius": "12px",
+            "sectionSpacing": "96px"
+        },
+        "sections": [
+            {
+                "id": "hero",
+                "type": "carousel",
+                "style": {
+                    "height": "80vh",
+                    "background": "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
+                    "textAlign": "left",
+                    "padding": "80px 0"
+                },
+                "slides": [
+                    {
+                        "headline": "Write less. Create more.",
+                        "subheadline": "PG3 turns your ideas into structured, production-ready prompts for images, videos, branding, and automation.",
+                        "ctaPrimary": "Start Creating",
+                        "ctaSecondary": "See Templates",
+                        "visual": "hero_mockup_1"
+                    },
+                    {
+                        "headline": "Stop wasting tokens on retries.",
+                        "subheadline": "PG3 eliminates vague prompts, hallucinations, and back-and-forth revisions — saving you time and money.",
+                        "ctaPrimary": "Start Saving Tokens",
+                        "visual": "hero_mockup_2"
+                    },
+                    {
+                        "headline": "One-click templates for every creative workflow.",
+                        "subheadline": "Cinematic scenes, branding, character design, product renders, fashion, architecture, and more.",
+                        "ctaPrimary": "Browse Templates",
+                        "visual": "hero_mockup_3"
+                    },
+                    {
+                        "headline": "Text or JSON — your workflow, your choice.",
+                        "subheadline": "Export structured JSON for pipelines, batch generation, and automation tools.",
+                        "ctaPrimary": "Generate JSON",
+                        "visual": "hero_mockup_4"
+                    }
+                ]
+            },
+            {
+                "id": "problem",
+                "type": "content-block",
+                "style": {
+                    "background": "#FFFFFF",
+                    "padding": "80px 0"
+                },
+                "title": "Why Creating With AI Still Feels Hard",
+                "items": [
+                    "Creators aren’t trained prompt engineers.",
+                    "Endless revisions burn time and tokens.",
+                    "AI models hallucinate without structure.",
+                    "Every platform has different rules.",
+                    "AI tools don’t teach prompt writing — because token burn is their business model."
+                ]
+            },
+            {
+                "id": "solution",
+                "type": "feature-highlight",
+                "style": {
+                    "background": "#F9FAFB",
+                    "padding": "80px 0"
+                },
+                "title": "PG3 Writes the Prompt For You",
+                "features": [
+                    {
+                        "title": "Turn Ideas Into Production-Ready Prompts",
+                        "description": "PG3 transforms rough concepts into structured prompts optimized for images, videos, branding, characters, and automation."
+                    },
+                    {
+                        "title": "Expert-Crafted Templates",
+                        "description": "Start with templates for cinematic scenes, product renders, branding, character sheets, fashion, architecture, and more."
+                    },
+                    {
+                        "title": "Structured Prompts Models Understand",
+                        "description": "Correct vocabulary, formatting, continuity tokens, negative prompts, and platform-specific syntax."
+                    },
+                    {
+                        "title": "Fewer Revisions. Fewer Tokens Burned.",
+                        "description": "PG3 eliminates the top causes of wasted generations and hallucinations."
+                    },
+                    {
+                        "title": "Works With Every AI Tool",
+                        "description": "Midjourney, Runway, Sora, SDXL, DALL·E, Pika, Leonardo — PG3 powers them all."
+                    },
+                    {
+                        "title": "Text or JSON Output",
+                        "description": "Copy a clean text prompt or export structured JSON for automation pipelines."
+                    }
+                ]
+            },
+            {
+                "id": "useCases",
+                "type": "grid",
+                "style": {
+                    "background": "#FFFFFF",
+                    "padding": "80px 0"
+                },
+                "title": "Built for Every Creative Workflow",
+                "columns": 3,
+                "items": [
+                    {
+                        "title": "Image Generation",
+                        "description": "Structured prompts for concept art, product shots, illustrations, thumbnails, and environments."
+                    },
+                    {
+                        "title": "Cinematic Video",
+                        "description": "Scene-accurate shot prompts with camera angles, movement, and continuity for Sora, Runway, and Pika."
+                    },
+                    {
+                        "title": "Branding & Logos",
+                        "description": "Prompts for brand identity, color theory, typography, and multiple logo variations."
+                    },
+                    {
+                        "title": "Character Design",
+                        "description": "Character sheets, continuity tokens, consistent poses, expressions, and angles."
+                    },
+                    {
+                        "title": "Fashion & Product Design",
+                        "description": "Fabric, texture, silhouette, and lighting prompts for realistic outputs."
+                    },
+                    {
+                        "title": "Architecture",
+                        "description": "Elevation-ready prompts with materials, scale, lighting, and style consistency."
+                    },
+                    {
+                        "title": "Automation Pipelines",
+                        "description": "JSON-LD shot lists, batch prompts, and multi-scene continuity for workflows."
+                    },
+                    {
+                        "title": "Social Media",
+                        "description": "Platform-optimized prompts for YouTube, TikTok, Instagram, and more."
+                    }
+                ]
+            },
+            {
+                "id": "features",
+                "type": "icon-grid",
+                "style": {
+                    "background": "#F9FAFB",
+                    "padding": "80px 0"
+                },
+                "title": "Everything You Need to Create With Confidence",
+                "items": [
+                    "Structured Prompt Engine",
+                    "One-Click Expert Templates",
+                    "Continuity Tokens",
+                    "Platform-Optimized Syntax",
+                    "Text or JSON Output",
+                    "Batch Variation Engine",
+                    "Hallucination-Resistant Design",
+                    "Automation-Ready Workflows",
+                    "Creator-Friendly Interface"
+                ]
+            },
+            {
+                "id": "howItWorks",
+                "type": "steps",
+                "style": {
+                    "background": "#FFFFFF",
+                    "padding": "80px 0"
+                },
+                "title": "From Idea to Perfect Prompt in Seconds",
+                "steps": [
+                    {
+                        "step": 1,
+                        "title": "Choose a Template",
+                        "description": "Select from expert-crafted templates for any creative workflow."
+                    },
+                    {
+                        "step": 2,
+                        "title": "Add Your Idea",
+                        "description": "Describe your concept in simple language — PG3 fills in the details."
+                    },
+                    {
+                        "step": 3,
+                        "title": "Get a Production-Ready Prompt",
+                        "description": "Copy text or export JSON. Structured, optimized, and ready to generate."
+                    }
+                ]
+            },
+            {
+                "id": "pricing",
+                "type": "pricing-table",
+                "style": {
+                    "background": "#F9FAFB",
+                    "padding": "80px 0"
+                },
+                "title": "Pricing That Pays for Itself",
+                "plans": [
+                    {
+                        "name": "Basic",
+                        "price": "2.99",
+                        "features": [
+                            "100 prompts",
+                            "1,000 token cap",
+                            "basic templates",
+                            "Text output",
+                            "Email support"
+                        ],
+                        "cta": "Start with Basic"
+                    },
+                    {
+                        "name": "Pro",
+                        "price": "4.99",
+                        "features": [
+                            "100 prompts",
+                            "1,000 token cap",
+                            "basic templates",
+                            "Text + Json output",
+                            "Email support"
+                        ],
+                        "cta": "Upgrade to Pro"
+                    },
+                    {
+                        "name": "Studio",
+                        "price": "Coming Soon",
+                        "features": [
+                            "Unlimited prompts",
+                            "Team seats",
+                            "Shared continuity profiles",
+                            "API access",
+                            "Priority support"
+                        ],
+                        "cta": "Join Waitlist"
+                    }
+                ]
+            },
+            {
+                "id": "testimonials",
+                "type": "quotes",
+                "style": {
+                    "background": "#FFFFFF",
+                    "padding": "80px 0"
+                },
+                "title": "What Creators Say About PG3",
+                "items": [
+                    "PG3 cut my retries by 70%. I spend less time fixing prompts and more time creating.",
+                    "Finally a tool that understands how video prompts actually work. My Sora scenes look consistent for the first time.",
+                    "I used to waste so many tokens on Midjourney. PG3 pays for itself in a single day.",
+                    "The JSON export is a game-changer. I plugged PG3 into my automation pipeline and everything just works."
+                ]
+            },
+            {
+                "id": "faq",
+                "type": "accordion",
+                "style": {
+                    "background": "#F9FAFB",
+                    "padding": "80px 0"
+                },
+                "title": "Frequently Asked Questions",
+                "items": [
+                    {
+                        "question": "What makes PG3 different?",
+                        "answer": "PG3 doesn’t rewrite prompts — it engineers them with structure, clarity, and platform-specific rules."
+                    },
+                    {
+                        "question": "Do I need prompt engineering skills?",
+                        "answer": "No. You describe your idea. PG3 handles the structure and formatting."
+                    },
+                    {
+                        "question": "Does PG3 work with all major AI tools?",
+                        "answer": "Yes. PG3 formats prompts for Midjourney, Runway, Sora, SDXL, DALL·E, Pika, Leonardo, and more."
+                    },
+                    {
+                        "question": "How does PG3 reduce hallucinations?",
+                        "answer": "By using strict structure, clarity rules, negative prompts, and platform-specific constraints."
+                    },
+                    {
+                        "question": "Can I cancel anytime?",
+                        "answer": "Yes. There are no contracts or commitments."
+                    }
+                ]
+            }
+        ]
+    }
+}

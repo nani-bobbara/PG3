@@ -42,6 +42,15 @@ export default async function SettingsPage() {
     // Feature flag for personal key default
     const usePersonalDefault = false;
 
+    // Fetch all subscription tiers to get dynamic prices and IDs
+    const { data: tiers } = await supabase
+        .from("subscription_tiers")
+        .select("id, name, monthly_quota, features, stripe_monthly_price_id, stripe_yearly_price_id, monthly_price_in_cents, yearly_price_in_cents")
+        .eq("is_active", true);
+
+    const basicTier = tiers?.find(t => t.id === 'basic');
+    const proTier = tiers?.find(t => t.id === 'pro');
+
     const keyStatus = await getApiKeyStatus();
 
     return (
@@ -49,8 +58,22 @@ export default async function SettingsPage() {
             userEmail={user.email || ""}
             userName={profile?.full_name || user.email?.split("@")[0] || "User"}
             keyStatus={keyStatus}
-            priceBasicId={process.env.NEXT_PUBLIC_STRIPE_PRICE_BASIC || ""}
-            priceProId={process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || ""}
+            tiers={{
+                basic: {
+                    monthlyPriceId: basicTier?.stripe_monthly_price_id || "",
+                    yearlyPriceId: basicTier?.stripe_yearly_price_id || "",
+                    monthlyPriceInCents: basicTier?.monthly_price_in_cents || 2000,
+                    yearlyPriceInCents: basicTier?.yearly_price_in_cents || 0,
+                    quota: basicTier?.monthly_quota || 200
+                },
+                pro: {
+                    monthlyPriceId: proTier?.stripe_monthly_price_id || "",
+                    yearlyPriceId: proTier?.stripe_yearly_price_id || "",
+                    monthlyPriceInCents: proTier?.monthly_price_in_cents || 5000,
+                    yearlyPriceInCents: proTier?.yearly_price_in_cents || 0,
+                    quota: proTier?.monthly_quota || 600
+                }
+            }}
             subscription={{
                 tierName: currentTier.name,
                 quotaUsed: quotaUsed,

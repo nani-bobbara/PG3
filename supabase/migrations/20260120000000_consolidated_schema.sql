@@ -57,12 +57,14 @@ CREATE TABLE public.subscription_tiers (
   id TEXT PRIMARY KEY, 
   name TEXT NOT NULL,
   description TEXT,
-  price_in_cents INTEGER NOT NULL,
+  monthly_price_in_cents INTEGER,
+  yearly_price_in_cents INTEGER,
   currency TEXT DEFAULT 'usd',
   monthly_quota INTEGER NOT NULL, 
   features JSONB DEFAULT '[]'::jsonb,
   stripe_product_id TEXT,
-  stripe_price_id TEXT,
+  stripe_monthly_price_id TEXT,
+  stripe_yearly_price_id TEXT,
   is_active BOOLEAN DEFAULT true,
   is_default BOOLEAN DEFAULT false,
   retention_days INTEGER DEFAULT 30,
@@ -209,26 +211,17 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
-CREATE OR REPLACE FUNCTION public.purge_expired_prompts()
-RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
-BEGIN
-  DELETE FROM public.user_prompts p
-  USING public.user_subscriptions s, public.subscription_tiers t
-  WHERE p.user_id = s.user_id
-    AND s.tier_id = t.id
-    AND p.created_at < (now() - (t.retention_days || ' days')::interval);
-END;
-$$;
-
 -- =================================================================================
 -- 6. SEED DATA
 -- =================================================================================
 
-INSERT INTO public.subscription_tiers (id, name, description, price_in_cents, monthly_quota, retention_days, is_default, features) VALUES
-('free', 'Free', 'Perfect for hobbyists.', 0, 50, 30, true, '["50 prompts/month", "30-day history"]'::jsonb),
-('basic', 'Basic', 'For consistent creators.', 2000, 200, 60, false, '["200 prompts/month", "60-day history"]'::jsonb),
-('pro', 'Pro', 'For power users.', 5000, 600, 90, false, '["600 prompts/month", "90-day history"]'::jsonb)
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.subscription_tiers (id, name, description, monthly_price_in_cents, yearly_price_in_cents, monthly_quota, retention_days, is_default, features, stripe_product_id, stripe_monthly_price_id, stripe_yearly_price_id) VALUES
+('free', 'Free', 'Perfect for hobbyists.', 0, 0, 50, 30, true, '["50 prompts/month", "30-day history"]'::jsonb, NULL, NULL, NULL),
+('basic', 'Basic', 'For consistent creators.', 2000, 0, 200, 60, false, '["200 prompts/month", "60-day history"]'::jsonb, 'prod_TpECeLNea3s1D3', 'price_1SrZkZDf8eZbtpDlrhlgqfDx', NULL),
+('pro', 'Pro', 'For power users.', 5000, 0, 600, 90, false, '["600 prompts/month", "90-day history"]'::jsonb, 'prod_TpEGwSM4LTIWIc', 'price_1SrZniDf8eZbtpDlHBvamE79', NULL)
+ON CONFLICT (id) DO UPDATE SET
+    stripe_product_id = EXCLUDED.stripe_product_id,
+    stripe_monthly_price_id = EXCLUDED.stripe_monthly_price_id;
 
 INSERT INTO public.supported_ai_models (model_id, name, provider, description, endpoint, env_key, is_default) VALUES
 (
@@ -256,3 +249,29 @@ ON CONFLICT (model_id) DO UPDATE SET
 INSERT INTO public.supported_templates (category, name, description, structure, min_tier_id) VALUES
 ('Image', 'Midjourney v6', 'Photorealistic creation', 'Subject: {{details}} --v 6.0', 'free')
 ON CONFLICT DO NOTHING;
+
+-- =================================================================================
+-- 7. REALTIME & CRON OPTIMIZATION (MERGED)
+-- =================================================================================
+
+CREATE OR REPLACE FUNCTION public.purge_expired_prompts()
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  DELETE FROM public.user_prompts p
+  USING public.user_subscriptions s, public.subscription_tiers t
+  WHERE p.user_id = s.user_id
+    AND s.tier_id = t.id
+    AND p.created_at < (now() - (t.retention_days || ' days')::interval);
+END;
+$$;
+
+-- Schedule the cleanup job (Every day at 3:00 AM)
+SELECT cron.schedule(
+  'purge-expired-prompts', -- name of the cron job
+  '0 3 * * *',             -- every day at 3 am
+  'SELECT public.purge_expired_prompts()'
+);
+
+-- Enable Realtime for specific tables (allows frontend to subscribe to changes)
+ALTER PUBLICATION supabase_realtime ADD TABLE public.user_subscriptions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.user_prompts;

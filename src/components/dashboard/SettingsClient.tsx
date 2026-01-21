@@ -30,8 +30,22 @@ interface SettingsClientProps {
     userEmail: string;
     userName: string;
     keyStatus: { [key: string]: boolean };
-    priceBasicId: string;
-    priceProId: string;
+    tiers: {
+        basic: {
+            monthlyPriceId: string;
+            yearlyPriceId: string;
+            monthlyPriceInCents: number;
+            yearlyPriceInCents: number;
+            quota: number;
+        };
+        pro: {
+            monthlyPriceId: string;
+            yearlyPriceId: string;
+            monthlyPriceInCents: number;
+            yearlyPriceInCents: number;
+            quota: number;
+        };
+    };
     subscription: {
         tierName: string;
         quotaUsed: number;
@@ -43,9 +57,10 @@ interface SettingsClientProps {
     };
 }
 
-export function SettingsClient({ userEmail, userName, keyStatus, priceProId, subscription }: SettingsClientProps) {
+export function SettingsClient({ userEmail, userName, keyStatus, tiers, subscription }: SettingsClientProps) {
     const { models, isLoadingModels, modelsError } = useDynamicConfig();
     const [keys, setKeys] = useState<{ [key: string]: string }>({});
+    const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month');
     const [isPending, startTransition] = useTransition();
     const [savingProvider, setSavingProvider] = useState<string | null>(null);
 
@@ -110,6 +125,17 @@ export function SettingsClient({ userEmail, userName, keyStatus, priceProId, sub
             } else {
                 toast.error(result.error || "Failed to update settings");
             }
+        });
+    };
+
+    const handleUpgrade = (priceId: string) => {
+        if (!priceId) {
+            toast.error("Plan configuration missing");
+            return;
+        }
+        toast.promise(createCheckoutSession(priceId), {
+            loading: 'Redirecting to checkout...',
+            error: 'Failed to start checkout'
         });
     };
 
@@ -312,32 +338,44 @@ export function SettingsClient({ userEmail, userName, keyStatus, priceProId, sub
                                             Manage your subscription and billing details.
                                         </CardDescription>
                                     </div>
-                                    {subscription.tierName === 'Free' ? (
-                                        <Button onClick={() => {
-                                            toast.promise(createCheckoutSession(priceProId || 'price_pro_placeholder_id'), {
-                                                loading: 'Redirecting to checkout...',
-                                                error: 'Failed to start checkout'
-                                            });
-                                        }}>
-                                            Upgrade to Pro
-                                        </Button>
-                                    ) : (
-                                        <Button variant="outline" onClick={() => {
-                                            toast.promise(createPortalSession(), {
-                                                loading: 'Opening billing portal...',
-                                                error: 'Failed to open portal'
-                                            });
-                                        }}>
-                                            Manage Subscription
-                                        </Button>
-                                    )}
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center space-x-2 bg-muted p-1 rounded-lg">
+                                            <Button
+                                                variant={billingInterval === 'month' ? 'secondary' : 'ghost'}
+                                                size="sm"
+                                                onClick={() => setBillingInterval('month')}
+                                            >
+                                                Monthly
+                                            </Button>
+                                            <Button
+                                                variant={billingInterval === 'year' ? 'secondary' : 'ghost'}
+                                                size="sm"
+                                                onClick={() => setBillingInterval('year')}
+                                            >
+                                                Yearly
+                                            </Button>
+                                        </div>
+                                        {subscription.tierName !== 'Free' && (
+                                            <Button variant="outline" onClick={() => {
+                                                toast.promise(createPortalSession(), {
+                                                    loading: 'Opening billing portal...',
+                                                    error: 'Failed to open portal'
+                                                });
+                                            }}>
+                                                Manage Subscription
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             </CardHeader>
                             <CardContent>
                                 <div className="grid gap-4 md:grid-cols-3">
                                     {/* Free Plan */}
                                     <div className={`p-4 rounded-lg border ${subscription.tierName === 'Free' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                        <h4 className="font-bold mb-2">Free</h4>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold">Free</h4>
+                                            {subscription.tierName === 'Free' && <Badge>Active</Badge>}
+                                        </div>
                                         <p className="text-2xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                                         <ul className="text-sm space-y-2 mb-4">
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 10 Prompts/mo</li>
@@ -347,23 +385,77 @@ export function SettingsClient({ userEmail, userName, keyStatus, priceProId, sub
 
                                     {/* Basic Plan */}
                                     <div className={`p-4 rounded-lg border ${subscription.tierName === 'Basic' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                        <h4 className="font-bold mb-2">Basic</h4>
-                                        <p className="text-2xl font-bold mb-4">$2<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold">Basic</h4>
+                                            {subscription.tierName === 'Basic' && <Badge>Active</Badge>}
+                                        </div>
+                                        <p className="text-2xl font-bold mb-4">
+                                            ${billingInterval === 'month'
+                                                ? tiers.basic.monthlyPriceInCents / 100
+                                                : (tiers.basic.yearlyPriceInCents / 100 / 12).toFixed(2)
+                                            }
+                                            <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                                        </p>
+                                        {billingInterval === 'year' && tiers.basic.yearlyPriceInCents > 0 && (
+                                            <p className="text-xs text-muted-foreground mb-2">
+                                                Billed ${tiers.basic.yearlyPriceInCents / 100} yearly
+                                            </p>
+                                        )}
                                         <ul className="text-sm space-y-2 mb-4">
-                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 50 Prompts/mo</li>
+                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> {tiers.basic.quota} Prompts/mo</li>
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> More Patterns</li>
                                         </ul>
+                                        {subscription.tierName !== 'Basic' && (
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => handleUpgrade(
+                                                    billingInterval === 'month'
+                                                        ? tiers.basic.monthlyPriceId
+                                                        : tiers.basic.yearlyPriceId
+                                                )}
+                                                disabled={billingInterval === 'year' && !tiers.basic.yearlyPriceId}
+                                            >
+                                                {subscription.tierName === 'Pro' ? 'Downgrade' : 'Upgrade'}
+                                            </Button>
+                                        )}
                                     </div>
 
                                     {/* Premium Plan */}
-                                    <div className={`p-4 rounded-lg border ${subscription.tierName === 'Premium' ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                        <h4 className="font-bold mb-2">Premium</h4>
-                                        <p className="text-2xl font-bold mb-4">$5<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                                    <div className={`p-4 rounded-lg border ${subscription.tierName === 'Pro' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-bold">Pro</h4>
+                                            {subscription.tierName === 'Pro' && <Badge>Active</Badge>}
+                                        </div>
+                                        <p className="text-2xl font-bold mb-4">
+                                            ${billingInterval === 'month'
+                                                ? tiers.pro.monthlyPriceInCents / 100
+                                                : (tiers.pro.yearlyPriceInCents / 100 / 12).toFixed(2)
+                                            }
+                                            <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                                        </p>
+                                        {billingInterval === 'year' && tiers.pro.yearlyPriceInCents > 0 && (
+                                            <p className="text-xs text-muted-foreground mb-2">
+                                                Billed ${tiers.pro.yearlyPriceInCents / 100} yearly
+                                            </p>
+                                        )}
                                         <ul className="text-sm space-y-2 mb-4">
-                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> 150 Prompts/mo</li>
+                                            <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> {tiers.pro.quota} Prompts/mo</li>
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> All Patterns</li>
                                             <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-500" /> BYOK Priority Access</li>
                                         </ul>
+                                        {subscription.tierName !== 'Pro' && (
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => handleUpgrade(
+                                                    billingInterval === 'month'
+                                                        ? tiers.pro.monthlyPriceId
+                                                        : tiers.pro.yearlyPriceId
+                                                )}
+                                                disabled={billingInterval === 'year' && !tiers.pro.yearlyPriceId}
+                                            >
+                                                Upgrade
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
